@@ -38,6 +38,30 @@ http://YOUR_COMPUTER_IP:8002
 
 Use `TOPO_HOST` and `TOPO_PORT` to override the bind address or port.
 
+## Deploy the frontend and backend separately
+
+GitHub Pages hosts the static frontend through the included `deploy-pages.yml` workflow. Before deploying, edit `src/config.js` and set:
+
+```js
+window.TOPO_API_URL = "https://your-backend.onrender.com";
+```
+
+Deploy the Python backend on Render with:
+
+```text
+Build command: pip install -r src/requirements.txt
+Start command: python src/server.py
+```
+
+Set these Render environment variables:
+
+```text
+ALLOWED_ORIGIN=https://YOUR_USERNAME.github.io
+PUBLIC_BASE_URL=https://your-backend.onrender.com
+```
+
+The backend reads Render's `PORT` variable automatically. Enable GitHub Pages with **Settings → Pages → GitHub Actions**.
+
 ## Data and attribution
 
 - Map tiles and hydrography: [© OpenStreetMap contributors](https://www.openstreetmap.org/copyright), available under the [ODbL](https://opendatacommons.org/licenses/odbl/).

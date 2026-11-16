@@ -55,6 +55,8 @@ OVERPASS_URLS = (
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
 )
+ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "*")
+PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/")
 GENERATED.mkdir(exist_ok=True)
 
 
@@ -525,9 +527,19 @@ class Handler(BaseHTTPRequestHandler):
     def send_bytes(self, body, content_type, status=HTTPStatus.OK):
         self.send_response(status)
         self.send_header("Content-Type", content_type)
+        self.send_header("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def do_OPTIONS(self):  # noqa: N802
+        self.send_response(HTTPStatus.NO_CONTENT)
+        self.send_header("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.end_headers()
 
     def do_GET(self):  # noqa: N802
         path = unquote(urlparse(self.path).path)
@@ -594,7 +606,7 @@ class Handler(BaseHTTPRequestHandler):
             filename, minimum, maximum, shape = result
             body = json.dumps(
                 {
-                    "url": f"/generated/{filename}",
+                    "url": f"{PUBLIC_BASE_URL}/generated/{filename}",
                     "filename": filename,
                     "min": round(minimum),
                     "max": round(maximum),
@@ -623,7 +635,7 @@ def reload_on_change(server):
 
 if __name__ == "__main__":
     host = os.environ.get("TOPO_HOST", "0.0.0.0")
-    port = int(os.environ.get("TOPO_PORT", "8002"))
+    port = int(os.environ.get("PORT", os.environ.get("TOPO_PORT", "8002")))
     server = ThreadingHTTPServer((host, port), Handler)
     print(f"Topo app listening on {host}:{port}")
     if "--reload" in sys.argv:

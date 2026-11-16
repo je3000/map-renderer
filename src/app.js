@@ -1,4 +1,6 @@
 const form = document.querySelector("#map-form");
+const API_BASE_URL = (window.TOPO_API_URL || "").replace(/\/$/, "");
+const apiUrl = (path) => `${API_BASE_URL}${path}`;
 const currStatus = document.querySelector("#status");
 const download = document.querySelector("#download");
 const tryAgain = document.querySelector("#retry");
@@ -232,13 +234,14 @@ form.addEventListener("submit", async (event) => {
   currStatus.className = "status busy";
   download.classList.add("hidden");
   try {
-    const response = await fetch("/api/render", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
+    const response = await fetch(apiUrl("/api/render"), { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
 
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Rendering failed.");
     const image = new Image();
     image.alt = "Generated topographic contour map";
-    image.src = `${result.url}?t=${Date.now()}`;
+    const resultUrl = result.url.startsWith("http") ? result.url : apiUrl(result.url);
+    image.src = `${resultUrl}?t=${Date.now()}`;
     resultLoading.classList.remove("hidden");
     image.onload = () => resultLoading.classList.add("hidden");
     image.onerror = () => {
@@ -257,7 +260,7 @@ form.addEventListener("submit", async (event) => {
     resultContainer.style.aspectRatio = `${result.shape[1]} / ${result.shape[0]}`;
     resultContainer.style.width = "100%";
     resultContainer.appendChild(image);
-    download.href = result.url;
+    download.href = resultUrl;
     download.download = `topographic-contours.${data.format}`;
     download.textContent = `Download ${data.format.toUpperCase()}`;
     currStatus.textContent = "";
