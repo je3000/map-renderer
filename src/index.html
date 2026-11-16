@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Map Renderer v1.0</title>
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+</head>
+
+<body>
+  <main>
+    <header>
+      <h1>Map Renderer v1.0</h1>
+      <p>Drag on the map to select a bounding box.</p>
+    </header>
+    <nav class="mode-tabs" role="tablist" aria-label="Map type">
+      <button type="button" class="tab active" data-mode="topo" role="tab" aria-selected="true" id="topo-tab">Topo</button>
+      <button type="button" class="tab" data-mode="water" role="tab" aria-selected="false" id="water-tab">Water</button>
+    </nav>
+    <section id="workspace-main" class="workspace">
+      <div id="visual-container">
+        <div id="map-container">
+          <div id="top-container">
+            <button type="button" id="settings-toggle" aria-label="Open settings" aria-expanded="false"><span
+                aria-hidden="true"></span></button>
+            <div id="settings-menu" class="settings-menu" aria-hidden="true">
+              <label class="setting interval">Interval (m)<input form="map-form" name="interval" type="number" min="1"
+                  step="1" value="30"></label>
+              <label class="setting line-width">Line width<input form="map-form" name="lineWidth" type="number"
+                  min="0.1" step="0.1" value="0.4"></label>
+              <label class="setting long-side">Long side (px)<input form="map-form" name="longSide" type="number"
+                  min="100" max="6000" step="1" value="2000"></label>
+              <div id="transparentSetting" style="display: flex; align-items: center;">
+                <label class="setting transparent">Transparent Background</label>
+                <input id="transparentBackground" form="map-form" name="transparentBackground" type="checkbox"
+                  style="width: 10%">
+              </div>
+              <label id="paperSetting" class="setting paper">Background color<input form="map-form" name="background"
+                  type="color" value="#FFFFFF"></label>
+
+              <label class="setting ink">Line color<input form="map-form" name="lineColor" type="color"
+                  value="#000000"></label>
+              <label class="setting fill-water"><input form="map-form" name="fillWater" type="checkbox">
+              Fill water bodies</label>
+
+              <label class="setting format">Format<select form="map-form" name="format">
+                  <option value="svg">SVG</option>
+                  <option value="png">PNG</option>
+                </select></label>
+            </div>
+            <form id="search-form" class="search">
+              <input id="search-input" type="search" placeholder="Search a place" autocomplete="off">
+              <button type="submit">Search</button>
+            </form>
+          </div>
+        <div id="map" aria-label="Map for selecting a bounding box">
+          <div id="loading-overlay" class="hidden" role="status">
+            Water maps use OpenStreetMap data and may take a while to generate.
+          </div>
+        </div>
+      </div>
+      <div id="result-container"></div>
+      <div id="result-loading" class="hidden" role="status">
+        <span class="globe-loader" aria-hidden="true"></span>
+        <span>Preparing preview…</span>
+      </div>
+      </div>
+      <div id="controls-buttons">
+        <button type="button" id="draw-toggle">Draw bounding box</button>
+        <button type="submit" id="render" form="map-form">Render</button>
+        <a id="download" class="download hidden" download>Download result</a>
+        <a id="retry" class="download hidden" href="#">Back</a>
+      </div>
+      <form id="map-form" class="controls">
+        <input type="hidden" name="mode" value="topo">
+        <div class="grid coordinates">
+          <label>West <input name="west" type="number" step="any" value="7.55"></label>
+          <label>South <input name="south" type="number" step="any" value="45.90"></label>
+          <label>East <input name="east" type="number" step="any" value="7.80"></label>
+          <label>North <input name="north" type="number" step="any" value="46.05"></label>
+        </div>
+
+        <p id="status" class="status"></p>
+      </form>
+      <!-- <section class="preview-panel">
+        <div class="preview-head"><span>Output</span><span id="stats"></span></div>
+        <div class="preview" id="preview"><div class="empty"><strong>Your terrain, drawn locally.</strong><span>Configure the bounds and render a contour plate.</span></div></div>
+      </section> -->
+    </section>
+  </main>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="/app.js"></script>
+</body>
+
+</html>
