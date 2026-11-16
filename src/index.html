@@ -16,7 +16,8 @@
       <p>Drag on the map to select a bounding box.</p>
     </header>
     <nav class="mode-tabs" role="tablist" aria-label="Map type">
-      <button type="button" class="tab active" data-mode="topo" role="tab" aria-selected="true" id="topo-tab">Topo</button>
+      <button type="button" class="tab active" data-mode="topo" role="tab" aria-selected="true"
+        id="topo-tab">Topo</button>
       <button type="button" class="tab" data-mode="water" role="tab" aria-selected="false" id="water-tab">Water</button>
     </nav>
     <section id="workspace-main" class="workspace">
@@ -43,7 +44,7 @@
               <label class="setting ink">Line color<input form="map-form" name="lineColor" type="color"
                   value="#000000"></label>
               <label class="setting fill-water"><input form="map-form" name="fillWater" type="checkbox">
-              Fill water bodies</label>
+                Fill water bodies</label>
 
               <label class="setting format">Format<select form="map-form" name="format">
                   <option value="svg">SVG</option>
@@ -55,17 +56,17 @@
               <button type="submit">Search</button>
             </form>
           </div>
-        <div id="map" aria-label="Map for selecting a bounding box">
-          <div id="loading-overlay" class="hidden" role="status">
-            Water maps use OpenStreetMap data and may take a while to generate.
+          <div id="map" aria-label="Map for selecting a bounding box">
+            <div id="loading-overlay" class="hidden" role="status">
+              Water maps use OpenStreetMap data and may take a while to generate.
+            </div>
           </div>
         </div>
-      </div>
-      <div id="result-container"></div>
-      <div id="result-loading" class="hidden" role="status">
-        <span class="globe-loader" aria-hidden="true"></span>
-        <span>Preparing preview…</span>
-      </div>
+        <div id="result-container"></div>
+        <div id="result-loading" class="hidden" role="status">
+          <span class="globe-loader" aria-hidden="true"></span>
+          <span>Preparing preview…</span>
+        </div>
       </div>
       <div id="controls-buttons">
         <button type="button" id="draw-toggle">Draw bounding box</button>

@@ -534,6 +534,7 @@ footer {
 }
 
 @media (max-width: 780px) {
+
     html,
     body {
         height: auto;

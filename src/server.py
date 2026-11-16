@@ -37,7 +37,12 @@ from rasterio.warp import (
     transform as transform_coords,
 )
 from shapely.geometry import LineString, Polygon, box
-from shapely.ops import linemerge, polygonize, transform as transform_geometry, unary_union
+from shapely.ops import (
+    linemerge,
+    polygonize,
+    transform as transform_geometry,
+    unary_union,
+)
 from shapely.validation import make_valid
 from pyproj import Transformer
 
@@ -176,6 +181,7 @@ out geom({south},{west},{north},{east}) qt;"""
             ways[element["id"]] = points
     areas = []
     lines = []
+
     def close_at_bbox(points):
         if points[0] == points[-1]:
             return points
@@ -197,7 +203,14 @@ out geom({south},{west},{north},{east}) qt;"""
         start, end = edge_point(points[0]), edge_point(points[-1])
         if not start or not end:
             return points
-        perimeter = [(west, south), (east, south), (east, north), (west, north), (west, south)]
+        perimeter = [
+            (west, south),
+            (east, south),
+            (east, north),
+            (west, north),
+            (west, south),
+        ]
+
         def position(point):
             for index, ((x1, y1), (x2, y2)) in enumerate(zip(perimeter, perimeter[1:])):
                 if x1 == x2 and point[0] == x1:
@@ -205,6 +218,7 @@ out geom({south},{west},{north},{east}) qt;"""
                 if y1 == y2 and point[1] == y1:
                     return index + (point[0] - x1) / (x2 - x1 or 1)
             return 0
+
         end_position, start_position = position(end), position(start)
         if start_position <= end_position:
             start_position += 4
@@ -236,15 +250,21 @@ out geom({south},{west},{north},{east}) qt;"""
                 areas.append(Polygon(closed))
             seen_area_ids.add(element["id"])
 
-    for relation in (element for element in elements if element.get("type") == "relation"):
+    for relation in (
+        element for element in elements if element.get("type") == "relation"
+    ):
         outers, inners = [], []
         for member in relation.get("members", []):
             if member.get("type") != "way" or member.get("ref") not in ways:
                 continue
-            (inners if member.get("role") == "inner" else outers).append(ways[member["ref"]])
+            (inners if member.get("role") == "inner" else outers).append(
+                ways[member["ref"]]
+            )
         if not outers:
             continue
-        outer_polygons = list(polygonize(linemerge([LineString(path) for path in outers])))
+        outer_polygons = list(
+            polygonize(linemerge([LineString(path) for path in outers]))
+        )
         inner_polygons = (
             list(polygonize(linemerge([LineString(path) for path in inners])))
             if inners
@@ -272,7 +292,13 @@ out geom({south},{west},{north},{east}) qt;"""
 
 
 def render_water_map(
-    bounds, color, line_color, line_width, long_side, output_format="png", fill_water=False
+    bounds,
+    color,
+    line_color,
+    line_width,
+    long_side,
+    output_format="png",
+    fill_water=False,
 ):
     if output_format not in {"png", "svg"}:
         raise ValueError("Output format must be png or svg.")
@@ -285,10 +311,7 @@ def render_water_map(
     dst_crs = f"EPSG:{32600 + zone if center_lat >= 0 else 32700 + zone}"
     projector = Transformer.from_crs("EPSG:4326", dst_crs, always_xy=True)
     areas = [transform_geometry(projector.transform, area) for area in areas]
-    waterways = [
-        [projector.transform(x, y) for x, y in line]
-        for line in waterways
-    ]
+    waterways = [[projector.transform(x, y) for x, y in line] for line in waterways]
     projected_corners = [
         projector.transform(x, y)
         for x, y in ((west, south), (west, north), (east, south), (east, north))
@@ -318,6 +341,7 @@ def render_water_map(
     )
     ax = fig.add_axes([0, 0, 1, 1], facecolor="none" if color == "none" else color)
     ax.set_axis_off()
+
     def draw_polygon(polygon):
         if polygon.geom_type == "GeometryCollection":
             for geometry in polygon.geoms:
@@ -332,7 +356,11 @@ def render_water_map(
             for ring in [item.exterior, *item.interiors]:
                 coordinates = list(ring.coords)
                 vertices.extend(coordinates)
-                codes.extend([MplPath.MOVETO] + [MplPath.LINETO] * (len(coordinates) - 2) + [MplPath.CLOSEPOLY])
+                codes.extend(
+                    [MplPath.MOVETO]
+                    + [MplPath.LINETO] * (len(coordinates) - 2)
+                    + [MplPath.CLOSEPOLY]
+                )
             ax.add_patch(
                 PathPatch(
                     MplPath(vertices, codes),
@@ -556,7 +584,9 @@ class Handler(BaseHTTPRequestHandler):
             if mode not in {"topo", "water"}:
                 raise ValueError("Unknown map mode.")
             if mode == "water":
-                result = render_water_map(*common, bool(payload.get("fillWater", False)))
+                result = render_water_map(
+                    *common, bool(payload.get("fillWater", False))
+                )
             else:
                 result = render_map(
                     bounds, interval, *common[1:], bool(payload.get("showWater", True))

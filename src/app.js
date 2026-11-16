@@ -233,7 +233,7 @@ form.addEventListener("submit", async (event) => {
   download.classList.add("hidden");
   try {
     const response = await fetch("/api/render", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data) });
-    
+
     const result = await response.json();
     if (!response.ok) throw new Error(result.error || "Rendering failed.");
     const image = new Image();
@@ -246,7 +246,7 @@ form.addEventListener("submit", async (event) => {
       currStatus.textContent = "Render failed: the generated image could not be displayed.";
       currStatus.className = "status error";
     };
-    
+
     // clear map container before adding the new image
     mapContainer.style.display = "none";
     drawToggle.classList.add("hidden");
