@@ -607,8 +607,8 @@ footer {
     #map {
         flex: 0 0 65dvh;
         min-height: 340px;
-        height: 65dvh;
-        max-height: 700px;
+        height: 55dvh;
+        max-height: 560px;
     }
 
     .preview:has(.empty) {

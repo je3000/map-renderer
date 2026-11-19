@@ -25,7 +25,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir site
-          cp src/index.html src/app.js src/config.js src/styles.css site/
+          cp src/index.html src/app.js src/config.js src/styles.css src/manifest.json src/sw.js src/icon-192.svg src/icon-512.svg site/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./site

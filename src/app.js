@@ -1,4 +1,7 @@
 console.log("Map Renderer app.js loaded", new Date().toISOString());
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("sw.js"));
+}
 const form = document.querySelector("#map-form");
 const API_BASE_URL = (window.TOPO_API_URL || "").replace(/\/$/, "");
 const apiUrl = (path) => `${API_BASE_URL}${path}`;
