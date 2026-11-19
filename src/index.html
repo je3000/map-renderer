@@ -10,7 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="Map Renderer">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.svg">
-  <title>Map Renderer v1.0</title>
+  <title>Map Renderer</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
@@ -18,7 +18,7 @@
 <body>
   <main>
     <header>
-      <h1>Map Renderer v1.0</h1>
+      <h1>Map Renderer</h1>
       <p>Drag on the map to select a bounding box.</p>
     </header>
     <nav class="mode-tabs" role="tablist" aria-label="Map type">
@@ -60,7 +60,7 @@
             </div>
             <form id="search-form" class="search">
               <input id="search-input" type="search" placeholder="Search a place" autocomplete="off">
-              <button type="submit">Search</button>
+              <button id="search-button" type="submit">Search</button>
             </form>
           </div>
           <div id="map" aria-label="Map for selecting a bounding box">

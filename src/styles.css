@@ -328,7 +328,24 @@ header p {
     left: 12px;
     margin: 0;
     height: 40px;
-    gap: 6px;
+    width: 100%;
+    gap: 12px;
+}
+
+#search-input {
+    height: 40px;
+    box-sizing: border-box;
+}
+
+#search-button {
+    height: 40px;
+}
+
+#search-form {
+    display: flex;
+    gap: 12px;
+    height: 40px;
+    font-size: 16px;
 }
 
 #settings-toggle {
@@ -434,7 +451,6 @@ input {
     padding: 7px;
     color: #111;
     background: #fff;
-    font: 13px monospace;
 }
 
 input[type=color] {
@@ -552,6 +568,14 @@ footer {
 }
 
 @media (max-width: 780px) {
+    .search {
+        width: 100%;
+    }
+
+    .search input {
+        min-width: 0;
+    }
+
     input,
     select,
     textarea,
@@ -613,5 +637,147 @@ footer {
 
     .preview:has(.empty) {
         min-height: 340px;
+    }
+}
+
+/* Visual system: restrained monochrome surfaces and consistent controls. */
+:root {
+    --ink: #111111;
+    --muted-ink: #666666;
+    --surface: #ffffff;
+    --surface-soft: #f3f3f3;
+    --line: #d7d7d7;
+    --radius: 10px;
+    --control-height: 40px;
+}
+
+body {
+    color: var(--ink);
+    background: #ededed;
+    font-family: "Inter", sans-serif;
+    letter-spacing: -0.01em;
+}
+
+main {
+    max-width: 1680px;
+    margin: 0 auto;
+}
+
+header h1 {
+    font-size: clamp(24px, 3vw, 36px);
+    font-weight: 600;
+    letter-spacing: -0.045em;
+}
+
+header p {
+    color: var(--muted-ink);
+    font-size: 14px;
+}
+
+.mode-tabs {
+    gap: 6px;
+    border-bottom-color: var(--ink);
+}
+
+.tab {
+    height: var(--control-height);
+    border-color: var(--ink);
+    border-radius: var(--radius) var(--radius) 0 0;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    background: #b5b5b5;
+}
+
+.tab.active {
+    background: var(--ink);
+    box-shadow: inset 0 -3px var(--ink);
+}
+
+.workspace {
+    border: 1px solid var(--ink);
+    border-top: 0;
+    border-radius: 0 0 var(--radius) var(--radius);
+    padding: 16px;
+    background: var(--surface);
+    box-shadow: 0 12px 30px rgb(0 0 0 / 7%);
+}
+
+#map {
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+#settings-toggle,
+button,
+.download {
+    border-radius: var(--radius);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    transition: background-color .15s ease, opacity .15s ease, transform .15s ease;
+}
+
+button:hover,
+.download:hover {
+    background: #333333;
+    transform: translateY(-1px);
+}
+
+button:active,
+.download:active {
+    transform: translateY(0);
+}
+
+input,
+select {
+    min-height: var(--control-height);
+    border: 1px solid #bdbdbd;
+    border-radius: 7px;
+    background: var(--surface);
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+input:focus,
+select:focus,
+button:focus-visible,
+.tab:focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+}
+
+.settings-menu {
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+    padding: 14px;
+    background: rgb(255 255 255 / 96%);
+    box-shadow: 0 16px 35px rgb(0 0 0 / 16%);
+    backdrop-filter: blur(10px);
+}
+
+.setting {
+    color: var(--muted-ink);
+    font-weight: 500;
+}
+
+.status {
+    color: var(--muted-ink);
+    font-size: 12px;
+}
+
+#result-container {
+    border-color: var(--ink);
+    border-radius: var(--radius);
+    background: var(--surface-soft);
+}
+
+@media (max-width: 780px) {
+    input,
+    select,
+    textarea,
+    button {
+        font-size: 16px;
     }
 }

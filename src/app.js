@@ -122,22 +122,11 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 }).addTo(map);
 function updateResponsiveVisualLayout() {
   const isMobile = window.matchMedia("(max-width: 780px)").matches;
-  console.debug("Responsive layout", {
-    viewport: `${window.innerWidth}x${window.innerHeight}`,
-    isMobile,
-    visualBefore: visualContainer.getBoundingClientRect().toJSON(),
-    mapBefore: document.querySelector("#map").getBoundingClientRect().toJSON(),
-  });
   if (isMobile) {
     visualContainer.style.removeProperty("height");
     visualContainer.style.removeProperty("flex");
     requestAnimationFrame(() => {
       map.invalidateSize();
-      console.debug("Responsive layout after mobile update", {
-        visual: visualContainer.getBoundingClientRect().toJSON(),
-        map: document.querySelector("#map").getBoundingClientRect().toJSON(),
-        mapCssHeight: getComputedStyle(document.querySelector("#map")).height,
-      });
     });
   } else {
     visualContainer.style.height = `${visualHeight}px`;
