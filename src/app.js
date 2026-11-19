@@ -1,3 +1,4 @@
+console.log("Map Renderer app.js loaded", new Date().toISOString());
 const form = document.querySelector("#map-form");
 const API_BASE_URL = (window.TOPO_API_URL || "").replace(/\/$/, "");
 const apiUrl = (path) => `${API_BASE_URL}${path}`;
@@ -33,7 +34,7 @@ updateFormatSettings();
 
 function setInterfaceBusy(busy) {
   document.body.classList.toggle("ui-busy", busy);
-  loadingOverlay.classList.toggle("hidden", !(busy && selectedMode === "water"));
+  loadingOverlay.classList.toggle("hidden", !(busy && selectedMode !== "topo"));
   document.querySelectorAll("button, input, select").forEach((control) => {
     control.disabled = busy;
   });
@@ -64,7 +65,7 @@ try {
   console.warn("Could not restore saved preferences:", error);
 }
 document.querySelector(".fill-water").style.display = selectedMode === "water" ? "flex" : "none";
-document.querySelector(".interval").style.display = selectedMode === "water" ? "none" : "grid";
+document.querySelector(".interval").style.display = selectedMode === "topo" ? "grid" : "none";
 
 function savePreferences() {
   const preferences = { mode: selectedMode };
@@ -86,7 +87,7 @@ document.querySelectorAll(".tab").forEach((tab) => tab.addEventListener("click",
   });
   selectedMode = tab.dataset.mode;
   modeInput.value = selectedMode;
-  document.querySelector(".interval").style.display = tab.dataset.mode === "water" ? "none" : "grid";
+  document.querySelector(".interval").style.display = tab.dataset.mode === "topo" ? "grid" : "none";
   document.querySelector(".fill-water").style.display = tab.dataset.mode === "water" ? "flex" : "none";
   if (waterSetting) waterSetting.style.display = tab.dataset.mode === "water" ? "none" : "grid";
   savePreferences();
@@ -107,14 +108,6 @@ document.addEventListener("pointerdown", (event) => {
   settingsMenu.classList.remove("open");
 });
 
-document.querySelectorAll('input[type="color"]').forEach((picker) => {
-  picker.addEventListener("change", () => {
-    settingsToggle.setAttribute("aria-expanded", "false");
-    settingsMenu.setAttribute("aria-hidden", "true");
-    settingsMenu.classList.remove("open");
-  });
-});
-
 transparentBackgroundBox.addEventListener("change", () => {
   document.getElementById("paperSetting").style.display = transparentBackgroundBox.checked ? "none" : "block";
 });
@@ -124,6 +117,32 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution: "© OpenStreetMap contributors",
   maxZoom: 18,
 }).addTo(map);
+function updateResponsiveVisualLayout() {
+  const isMobile = window.matchMedia("(max-width: 780px)").matches;
+  console.debug("Responsive layout", {
+    viewport: `${window.innerWidth}x${window.innerHeight}`,
+    isMobile,
+    visualBefore: visualContainer.getBoundingClientRect().toJSON(),
+    mapBefore: document.querySelector("#map").getBoundingClientRect().toJSON(),
+  });
+  if (isMobile) {
+    visualContainer.style.removeProperty("height");
+    visualContainer.style.removeProperty("flex");
+    requestAnimationFrame(() => {
+      map.invalidateSize();
+      console.debug("Responsive layout after mobile update", {
+        visual: visualContainer.getBoundingClientRect().toJSON(),
+        map: document.querySelector("#map").getBoundingClientRect().toJSON(),
+        mapCssHeight: getComputedStyle(document.querySelector("#map")).height,
+      });
+    });
+  } else {
+    visualContainer.style.height = `${visualHeight}px`;
+    visualContainer.style.flex = `0 0 ${visualHeight}px`;
+  }
+}
+window.addEventListener("resize", updateResponsiveVisualLayout);
+updateResponsiveVisualLayout();
 // map.getContainer().style.width = workspaceMain.offsetWidth + "px";
 let searchMarker;
 searchForm.addEventListener("submit", async (event) => {

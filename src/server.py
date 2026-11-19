@@ -55,7 +55,11 @@ OVERPASS_URLS = (
     "https://overpass-api.de/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
 )
-ALLOWED_ORIGIN = os.environ.get("ALLOWED_ORIGIN", "*")
+ALLOWED_ORIGINS = {
+    origin.strip()
+    for origin in os.environ.get("ALLOWED_ORIGIN", "*").split(",")
+    if origin.strip()
+}
 PUBLIC_BASE_URL = os.environ.get("PUBLIC_BASE_URL", "").rstrip("/")
 GENERATED.mkdir(exist_ok=True)
 
@@ -139,9 +143,9 @@ def fetch_osm_water(bounds):
   relation[\"type\"=\"multipolygon\"][\"natural\"=\"glacier\"]({south},{west},{north},{east});
   relation[\"type\"=\"multipolygon\"][\"landuse\"=\"basin\"]({south},{west},{north},{east});
 );
-out geom({south},{west},{north},{east});
+out geom qt;
 >;
-out geom({south},{west},{north},{east}) qt;"""
+out geom qt;"""
     data = None
     for endpoint in OVERPASS_URLS:
         log(f"Overpass request started: {endpoint}")
@@ -293,6 +297,51 @@ out geom({south},{west},{north},{east}) qt;"""
     return clipped_areas, lines
 
 
+def fetch_osm_roads(bounds):
+    """Fetch all OSM highway ways within the selected bounding box."""
+    west, south, east, north = bounds
+    log(f"Roads bbox: west={west}, south={south}, east={east}, north={north}")
+    query = f"""[out:json][timeout:180];
+way["highway"]({south},{west},{north},{east});
+out geom qt;"""
+    data = None
+    for endpoint in OVERPASS_URLS:
+        log(f"Overpass roads request started: {endpoint}")
+        request = urllib.request.Request(
+            endpoint,
+            data=urllib.parse.urlencode({"data": query}).encode(),
+            headers={
+                "User-Agent": "TopoRenderer/1.0 (local OSM map tool)",
+                "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
+                "Accept": "application/json",
+                "Origin": "https://overpass-turbo.eu",
+                "Referer": "https://overpass-turbo.eu/",
+            },
+        )
+        try:
+            with urllib.request.urlopen(request, timeout=200) as response:
+                data = json.load(response)
+            log(f"Overpass roads response received: {len(data.get('elements', []))} elements")
+            break
+        except (OSError, urllib.error.HTTPError, json.JSONDecodeError) as error:
+            log(f"Overpass roads request failed: {error}")
+    if data is None:
+        raise OSError("OpenStreetMap road data services timed out.")
+    lines = []
+    for element in data.get("elements", []):
+        if element.get("type") != "way":
+            continue
+        points = [
+            (point["lon"], point["lat"])
+            for point in element.get("geometry", [])
+            if point and "lon" in point and "lat" in point
+        ]
+        if len(points) >= 2:
+            lines.append(points)
+    log(f"Road geometry ready: {len(lines)} ways")
+    return [], lines
+
+
 def render_water_map(
     bounds,
     color,
@@ -301,11 +350,13 @@ def render_water_map(
     long_side,
     output_format="png",
     fill_water=False,
+    feature_fetcher=fetch_osm_water,
+    feature_label="Water",
 ):
     if output_format not in {"png", "svg"}:
         raise ValueError("Output format must be png or svg.")
-    log("Water map generation started")
-    areas, waterways = fetch_osm_water(bounds)
+    log(f"{feature_label} map generation started")
+    areas, waterways = feature_fetcher(bounds)
     west, south, east, north = bounds
     center_lon = (west + east) / 2
     center_lat = (south + north) / 2
@@ -524,10 +575,16 @@ def render_map(
 
 
 class Handler(BaseHTTPRequestHandler):
+    def cors_origin(self):
+        origin = self.headers.get("Origin", "")
+        if "*" in ALLOWED_ORIGINS:
+            return "*"
+        return origin if origin in ALLOWED_ORIGINS else "null"
+
     def send_bytes(self, body, content_type, status=HTTPStatus.OK):
         self.send_response(status)
         self.send_header("Content-Type", content_type)
-        self.send_header("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
+        self.send_header("Access-Control-Allow-Origin", self.cors_origin())
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.send_header("Content-Length", str(len(body)))
@@ -536,7 +593,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_OPTIONS(self):  # noqa: N802
         self.send_response(HTTPStatus.NO_CONTENT)
-        self.send_header("Access-Control-Allow-Origin", ALLOWED_ORIGIN)
+        self.send_header("Access-Control-Allow-Origin", self.cors_origin())
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Content-Type")
         self.end_headers()
@@ -593,11 +650,18 @@ class Handler(BaseHTTPRequestHandler):
                 payload.get("format", "png"),
             )
             mode = payload.get("mode", "topo")
-            if mode not in {"topo", "water"}:
+            if mode not in {"topo", "water", "roads"}:
                 raise ValueError("Unknown map mode.")
             if mode == "water":
                 result = render_water_map(
                     *common, bool(payload.get("fillWater", False))
+                )
+            elif mode == "roads":
+                result = render_water_map(
+                    *common,
+                    False,
+                    fetch_osm_roads,
+                    "Roads",
                 )
             else:
                 result = render_map(

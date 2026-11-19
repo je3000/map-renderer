@@ -1,11 +1,12 @@
 # Map Renderer
 
-Map Renderer is a local web app for creating customizable topographic contour maps and OpenStreetMap-based water maps. Exports are available as PNG or SVG.
+Map Renderer is a local web app for creating customizable topographic contour maps, OpenStreetMap-based water maps, and road maps. Exports are available as PNG or SVG.
 
 ## Features
 
 - Topographic contour maps from Copernicus DEM data.
 - Water maps from OpenStreetMap hydrography.
+- Road maps from OpenStreetMap `highway=*` features.
 - Lake, wetland, basin, river, stream, canal, and riverbank geometries.
 - Optional water-body fills or outline-only rendering.
 - PNG and SVG export.

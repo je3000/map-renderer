@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
   <title>Map Renderer v1.0</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -19,6 +19,7 @@
       <button type="button" class="tab active" data-mode="topo" role="tab" aria-selected="true"
         id="topo-tab">Topo</button>
       <button type="button" class="tab" data-mode="water" role="tab" aria-selected="false" id="water-tab">Water</button>
+      <button type="button" class="tab" data-mode="roads" role="tab" aria-selected="false" id="roads-tab">Roads</button>
     </nav>
     <section id="workspace-main" class="workspace">
       <div id="visual-container">
@@ -58,7 +59,7 @@
           </div>
           <div id="map" aria-label="Map for selecting a bounding box">
             <div id="loading-overlay" class="hidden" role="status">
-              Water maps use OpenStreetMap data and may take a while to generate.
+              OpenStreetMap data may take a while to generate.
             </div>
           </div>
         </div>
